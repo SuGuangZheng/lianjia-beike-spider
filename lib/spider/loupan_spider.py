@@ -46,7 +46,7 @@ class LouPanBaseSpider(BaseSpider):
         total_page = 1
         loupan_list = list()
         page = 'http://{0}.fang.{1}.com/loupan/'.format(city_name, SPIDER_NAME)
-        print(page)
+        print('基础url:' + page)
         headers = create_headers()
         response = requests.get(page, timeout=10, headers=headers)
         html = response.content
@@ -61,23 +61,39 @@ class LouPanBaseSpider(BaseSpider):
             print("\tWarning: only find one page for {0}".format(city_name))
             print(e)
 
-        print(total_page)
+        print('总页数：' + str(total_page))
         # 从第一页开始,一直遍历到最后一页
         headers = create_headers()
         for i in range(1, total_page + 1):
             page = 'http://{0}.fang.{1}.com/loupan/pg{2}'.format(city_name, SPIDER_NAME, i)
-            print(page)
-            BaseSpider.random_delay()
+            print('=====================当前页数:' + str(i)+'========================')
+            # BaseSpider.random_delay()
             response = requests.get(page, timeout=10, headers=headers)
             html = response.content
             soup = BeautifulSoup(html, "lxml")
 
             # 获得有小区信息的panel
             house_elements = soup.find_all('li', class_="resblock-list")
+            j = 0
             for house_elem in house_elements:
+                j = j + 1
+                xuhao = (i-1)*10+j
+                page = 'http://{0}.fang.{1}.com/loupan/pg{2}'.format(city_name, SPIDER_NAME, i)
                 price = house_elem.find('span', class_="number")
                 total = house_elem.find('div', class_="second")
                 loupan = house_elem.find('a', class_='name')
+                #加入获取楼盘坐标——added by sugz 2020年9月23日
+                detail_href = loupan.attrs['href'].replace('/loupan','')#楼盘详情url后缀
+
+                # 下面开始请求楼盘详情，获取楼盘坐标
+                page = page.replace('/pg'+str(i),'',1)
+                page = page + detail_href#楼盘详情url
+                # print(page)
+                # BaseSpider.random_delay()
+                response = requests.get(page, timeout=10, headers=headers)
+                html = response.content
+                soup = BeautifulSoup(html, "lxml")
+                coord = soup.find('span',id='mapWrapper').attrs['data-coord'] #'41.91778848717,123.43650112926'
 
                 # 继续清理数据
                 try:
@@ -93,11 +109,11 @@ class LouPanBaseSpider(BaseSpider):
                 except Exception as e:
                     total = '0'
 
-                print("{0} {1} {2} ".format(
-                    loupan, price, total))
+                print(str(xuhao) + ".{0},{1},{2},{3} ".format(
+                    loupan, price, total,coord))
 
                 # 作为对象保存
-                loupan = LouPan(loupan, price, total)
+                loupan = LouPan(loupan, price, total,coord)
                 loupan_list.append(loupan)
         return loupan_list
 

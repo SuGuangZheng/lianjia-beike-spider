@@ -6,7 +6,7 @@
 
 
 class LouPan(object):
-    def __init__(self, xiaoqu, price, total):
+    def __init__(self, xiaoqu, price, total,coordinate):
         # self.district = district
         # self.area = area
         self.xiaoqu = xiaoqu
@@ -14,8 +14,10 @@ class LouPan(object):
         # self.size = size
         self.price = price
         self.total = total
+        self.coordinate = coordinate
 
     def text(self):
         return self.xiaoqu + "," + \
                 self.price + "," + \
+                self.coordinate + "," + \
                 self.total
