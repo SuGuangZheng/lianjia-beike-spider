@@ -67,7 +67,7 @@ class LouPanBaseSpider(BaseSpider):
         for i in range(1, total_page + 1):
             page = 'http://{0}.fang.{1}.com/loupan/pg{2}'.format(city_name, SPIDER_NAME, i)
             print('=====================当前页数:' + str(i)+'========================')
-            # BaseSpider.random_delay()
+            BaseSpider.random_delay()
             response = requests.get(page, timeout=10, headers=headers)
             html = response.content
             soup = BeautifulSoup(html, "lxml")
@@ -81,7 +81,7 @@ class LouPanBaseSpider(BaseSpider):
                 page = 'http://{0}.fang.{1}.com/loupan/pg{2}'.format(city_name, SPIDER_NAME, i)
                 price = house_elem.find('span', class_="number")
                 total = house_elem.find('div', class_="second")
-                loupan = house_elem.find('a', class_='name')
+                loupanName = house_elem.find('a', class_='name')
                 #加入获取楼盘坐标——added by sugz 2020年9月23日
                 detail_href = loupan.attrs['href'].replace('/loupan','')#楼盘详情url后缀
 
@@ -93,7 +93,8 @@ class LouPanBaseSpider(BaseSpider):
                 response = requests.get(page, timeout=10, headers=headers)
                 html = response.content
                 soup = BeautifulSoup(html, "lxml")
-                coord = soup.find('span',id='mapWrapper').attrs['data-coord'] #'41.91778848717,123.43650112926'
+                coord = soup.find('span',id='mapWrapper').attrs['data-coord'] 
+                #'41.91778848717,123.43650112926'
 
                 # 继续清理数据
                 try:
@@ -101,7 +102,7 @@ class LouPanBaseSpider(BaseSpider):
                 except Exception as e:
                     price = '0'
 
-                loupan = loupan.text.replace("\n", "")
+                loupanName = loupanName.text.replace("\n", "")
 
                 try:
                     total = total.text.strip().replace(u'总价', '')
@@ -110,10 +111,10 @@ class LouPanBaseSpider(BaseSpider):
                     total = '0'
 
                 print(str(xuhao) + ".{0},{1},{2},{3} ".format(
-                    loupan, price, total,coord))
+                    loupanName, price, total,coord))
 
                 # 作为对象保存
-                loupan = LouPan(loupan, price, total,coord)
+                loupan = LouPan(loupanName, price, total,coord)
                 loupan_list.append(loupan)
         return loupan_list
 
