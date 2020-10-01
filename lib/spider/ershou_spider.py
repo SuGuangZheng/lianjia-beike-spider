@@ -180,6 +180,7 @@ class ErShouSpider(BaseSpider):
 
     def start(self):
         city = get_city()
+        self.maxPerArea = get_maxPerArea()
         self.today_path = create_date_path("{0}/ershou".format(SPIDER_NAME), city, self.date_string)
 
         t1 = time.time()  # 开始计时

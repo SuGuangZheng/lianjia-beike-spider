@@ -96,6 +96,26 @@ def get_city():
         exit(1)
     return city
 
+def get_maxPerArea():
+    maxQuantity = '请输入每个板块最大爬取条数，直接回车为不限制:'
+    while True:
+        if not PYTHON_3:  # 如果小于Python3
+                maxQ = raw_input(maxQuantity)
+        else:
+            maxQ = input(maxQuantity)
+        if maxQ == '':
+            maxQ = 9999999
+        
+        try:
+            maxQ = int(maxQ)
+        except Exception as e:
+            print(e)
+            print('输入错误，请输入正整数或直接回车。')
+            continue
+        else:
+            break
+    print('ok,每个板块最大条数:'+str(maxQ))
+    return maxQ
 
 if __name__ == '__main__':
     print(get_chinese_city("sh"))
