@@ -8,7 +8,7 @@ import re
 import threadpool
 from bs4 import BeautifulSoup
 from lib.item.ershou import *
-from lib.zone.city import get_city
+from lib.zone.city import get_city,get_maxPerArea
 from lib.spider.base_spider import *
 from lib.utility.date import *
 from lib.utility.path import *
@@ -63,8 +63,8 @@ class ErShouSpider(BaseSpider):
         soup = BeautifulSoup(html, "lxml")
         return soup
 
-    @staticmethod
-    def get_area_ershou_info(city_name, area_name):
+    
+    def get_area_ershou_info(self,city_name, area_name):
         """
         通过爬取页面获得城市指定版块的二手房信息
         :param city_name: 城市
@@ -105,11 +105,11 @@ class ErShouSpider(BaseSpider):
                 print('找不到page-box的页面：'+'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name))
                 #此处应该加一个暂停线程，等待输入ok后再继续的功能(人机验证)
                 # 等待输入ok后再继续
-                ok = input("请刷新页面进行人机验证，完成后输入ok，程序继续运行,否则跳过该板块内容")
-                if ok == 'ok':
-                    pass
+                stop = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则跳过该板块内容")
+                if stop == 'stop':
+                    return ershou_list
                 else:
-                    return list()
+                    pass
             #
             # total_page = 1    
         # 检测是否有房源——added by sugz 2020年9月23日
@@ -118,7 +118,10 @@ class ErShouSpider(BaseSpider):
         #     print(e)
 
         # 从第一页开始,一直遍历到最后一页
+        max_flag = False
         for num in range(1, total_page + 1):
+            if max_flag:
+                break
             page = 'http://{0}.{1}.com/ershoufang/{2}/pg{3}'.format(city_name, SPIDER_NAME, area_name, num)
             # print(page)  # 打印每一页的地址
             print('\n==================开始板块:'+area_name+\
@@ -174,6 +177,9 @@ class ErShouSpider(BaseSpider):
                 # 作为对象保存
                 ershou = ErShou(chinese_district, chinese_area, name, price, desc, pic,coord)
                 ershou_list.append(ershou)
+                if xuhao >= (self.maxPerArea-1):
+                    max_flag = True
+                    break
         return ershou_list
 
     
