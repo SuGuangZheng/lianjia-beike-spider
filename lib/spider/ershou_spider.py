@@ -18,6 +18,8 @@ import lib.utility.version
 
 
 class ErShouSpider(BaseSpider):
+    # def __init__(self, SPIDER_NAME):
+    #     self.SPIDER_NAME = SPIDER_NAME
     def collect_area_ershou_data(self, city_name, area_name, fmt="csv"):
         """
         对于每个板块,获得这个板块下所有二手房的信息
@@ -47,6 +49,20 @@ class ErShouSpider(BaseSpider):
         else:
             pass
 
+    
+    #added by sugz
+    @staticmethod
+    def makeSoup(city_name,area_name):
+        # s = requests.session()
+        # s.keep_alive = False
+        page = 'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name)
+        print('开始板块:'+ area_name)  # 打印版块地址
+        headers = create_headers()
+        response = requests.get(page, timeout=100, headers=headers)
+        html = response.content
+        soup = BeautifulSoup(html, "lxml")
+        return soup
+
     @staticmethod
     def get_area_ershou_info(city_name, area_name):
         """
@@ -55,30 +71,48 @@ class ErShouSpider(BaseSpider):
         :param area_name: 版块
         :return: 二手房数据列表
         """
+        s = requests.session()
+        s.keep_alive = False
         total_page = 1
         district_name = area_dict.get(area_name, "")
         # 中文区县
         chinese_district = get_chinese_district(district_name)
         # 中文版块
         chinese_area = chinese_area_dict.get(area_name, "")
-
         ershou_list = list()
-        page = 'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name)
-        print('开始板块:'+ area_name)  # 打印版块地址
-        headers = create_headers()
-        response = requests.get(page, timeout=10, headers=headers)
-        html = response.content
-        soup = BeautifulSoup(html, "lxml")
 
-        # 获得总的页数，通过查找总页码的元素信息
-        # try:
-        page_box = soup.find_all('div', class_='page-box')[0]
-        matches = re.search('.*"totalPage":(\d+),.*', str(page_box))
+        while True:
+            #重构发送请求函数makeSoup
+            soup = ErShouSpider.makeSoup(city_name, area_name)
+            # 获得总的页数，通过查找总页码的元素信息
+            #有房源的和无房源的都有page-box,有房源的两个page-box，第二个有totalPage
+            #无房源的无totalPage
+            # try:
+            page_box = soup.find_all('div', class_='page-box')
+            if page_box:
+                text = ''
+                for pgText in page_box:
+                    text = text + str(pgText)
+                page_box = text
+                matches = re.search('.*"totalPage":(\d+),.*', page_box)
+                if matches:
+                    total_page = int(matches.group(1))
+                else:#无房源无totalbox,直接返回空list即可
+                    return list()
+                break
+            else:#找不到page-box的div可能是被反爬虫了，应该把delay打开
+                print('找不到类名为page-box的div，可能被反爬虫了!!!')
+                print('找不到page-box的页面：'+'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name))
+                #此处应该加一个暂停线程，等待输入ok后再继续的功能(人机验证)
+                # 等待输入ok后再继续
+                ok = input("请刷新页面进行人机验证，完成后输入ok，程序继续运行,否则跳过该板块内容")
+                if ok == 'ok':
+                    pass
+                else:
+                    return list()
+            #
+            # total_page = 1    
         # 检测是否有房源——added by sugz 2020年9月23日
-        if matches:
-            total_page = int(matches.group(1))
-        else:
-            return list()
         # except Exception as e:
         #     print("\tWarning: only find one page for {0}".format(area_name))
         #     print(e)
@@ -92,7 +126,7 @@ class ErShouSpider(BaseSpider):
                     '===================')
             headers = create_headers()
             BaseSpider.random_delay()
-            response = requests.get(page, timeout=10, headers=headers)
+            response = requests.get(page, timeout=100, headers=headers)
             html = response.content
             soup = BeautifulSoup(html, "lxml")
 
@@ -118,7 +152,9 @@ class ErShouSpider(BaseSpider):
 
                 #加入获取楼盘坐标——added by sugz 2020年9月23日
                 detail_href = name.find('a').attrs['href']
-                response = requests.get(detail_href, timeout=10, headers=headers)
+                headers = create_headers()
+                BaseSpider.random_delay()
+                response = requests.get(detail_href, timeout=100, headers=headers)
                 html = response.content
                 chnHtml = html.decode()
                 matches = re.search("resblockPosition:'(\d+.\d*),(\d+.\d*)'", chnHtml)
@@ -139,6 +175,8 @@ class ErShouSpider(BaseSpider):
                 ershou = ErShou(chinese_district, chinese_area, name, price, desc, pic,coord)
                 ershou_list.append(ershou)
         return ershou_list
+
+    
 
     def start(self):
         city = get_city()
