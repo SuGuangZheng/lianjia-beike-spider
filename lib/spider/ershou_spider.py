@@ -48,7 +48,6 @@ class ErShouSpider(BaseSpider):
             print("完成板块: " + area_name + " \n数据保存到 : " + csv_file+'\n')
         else:
             pass
-
     
     #added by sugz
     @staticmethod
@@ -62,7 +61,6 @@ class ErShouSpider(BaseSpider):
         html = response.content
         soup = BeautifulSoup(html, "lxml")
         return soup
-
     
     def get_area_ershou_info(self,city_name, area_name):
         """
@@ -75,12 +73,11 @@ class ErShouSpider(BaseSpider):
         s.keep_alive = False
         total_page = 1
         district_name = self.area_dict.get(area_name, "")
-        # 中文区县
         chinese_district = get_chinese_district(district_name)
-        # 中文版块
         chinese_area = chinese_area_dict.get(area_name, "")
         ershou_list = list()
 
+        #本循环获取板块总页数total_page
         while True:
             #重构发送请求函数makeSoup
             soup = ErShouSpider.makeSoup(city_name, area_name)
@@ -103,14 +100,12 @@ class ErShouSpider(BaseSpider):
             else:#找不到page-box的div可能是被反爬虫了，应该把delay打开
                 print('找不到类名为page-box的div，可能被反爬虫了!!!')
                 print('找不到page-box的页面：'+'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name))
-                #此处应该加一个暂停线程，等待输入ok后再继续的功能(人机验证)
                 # 等待输入ok后再继续
                 stop = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
                 if stop == 'stop':
                     return ershou_list
                 else:
                     pass
-
 
         # 从第一页开始,一直遍历到最后一页
         max_flag = False
@@ -122,14 +117,27 @@ class ErShouSpider(BaseSpider):
             print('\n==================开始板块:'+area_name+\
                 '页数:' + str(num) + '/' + str(total_page) + \
                     '===================')
-            headers = create_headers()
-            BaseSpider.random_delay()
-            response = requests.get(page, timeout=100, headers=headers)
-            html = response.content
-            soup = BeautifulSoup(html, "lxml")
+            while True:
+                headers = create_headers()
+                BaseSpider.random_delay()
+                response = requests.get(page, timeout=100, headers=headers)
+                html = response.content
+                soup = BeautifulSoup(html, "lxml")
+                house_elements = soup.find_all('li', class_="clear")
+                if not house_elements:
+                    #如果house_elements为空
+                    print('找不到板块的某一页，可能被反爬虫了!!!')
+                    print('找不到的页面：'+ page)
+                    # 等待输入ok后再继续
+                    stop1 = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
+                    if stop1 == 'stop':
+                        return ershou_list
+                    else:
+                        continue
+                else:
+                    break
 
-            house_elements = soup.find_all('li', class_="clear")
-            # for house_elem in house_elements:
+            # 获取每一页中的每个房子信息
             for (i,house_elem) in enumerate(house_elements):
                 xuhao = (num-1)*30 + i
                 # price由原来的总价改为单价——modified by sugz 2020年9月23日
@@ -140,12 +148,24 @@ class ErShouSpider(BaseSpider):
 
                 #加入获取楼盘坐标——added by sugz 2020年9月23日
                 detail_href = name.find('a').attrs['href']
-                headers = create_headers()
-                BaseSpider.random_delay()
-                response = requests.get(detail_href, timeout=100, headers=headers)
-                html = response.content
-                chnHtml = html.decode()
-                matches = re.search("resblockPosition:'(\d+.\d*),(\d+.\d*)'", chnHtml)
+                while True:
+                    headers = create_headers()
+                    BaseSpider.random_delay()
+                    response = requests.get(detail_href, timeout=100, headers=headers)
+                    html = response.content
+                    chnHtml = html.decode()
+                    matches = re.search("resblockPosition:'(\d+.\d*),(\d+.\d*)'", chnHtml)
+                    if not matches:
+                        print('找不到某个房屋详情页，可能被反爬虫了!!!')
+                        print('找不到的页面：'+ detail_href)
+                        # 等待输入ok后再继续
+                        stop1 = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
+                        if stop1 == 'stop':
+                            return ershou_list
+                        else:
+                            continue
+                    else:
+                        break
                 coord = matches.group(2) +',' + matches.group(1)
                 #'41.754335,123.503577'
 
