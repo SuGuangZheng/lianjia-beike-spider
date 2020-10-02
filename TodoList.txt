@@ -1,6 +1,24 @@
 考虑添加的功能：
 ershou：
-1.超过1000条的板块只要前1000条。
-或者开始时输入每个板块最大条数：max_perArea
+
 2.每下载到一页的数据就写入csv，而非目前的每个板块全部完成再写入
-3.开头由用户输入板块名list，指定本次爬虫要采集的板块
+4.每个发req的地方都要加input暂停，等人工进行人机验证后输入ok后再继续
+
+
+
+
+
+
+
+
+全部区县: ['kangpingxian', 'xinminshi', 'fakuxian', 'liaozhongqu', 'tiexi', 'heping1', 'shenhe', 'hunnan', 'dadong', 'huanggu', 'yuhong', 'sujiatun', 'shenbeixinqu']
+
+
+areas:
+['kangpingxian1', 'fakuxian1', 'xinminshi1', 'fakuxian1', 'kangpingxian1', 'liaozhongqu1', 'xinminshi1', 'baogongbei', 'baogongnan', 'beierlu', 'beiyilu', 'gongrencun1', 'huaxiang2', 'jihong', 'jingjijishukaifaqu', 'qigongjie', 'tiexiguangchang', 'xinggongjie', 'xizhan1', 'yanfen', 'yuhongguangchang', 'yunfeng', 'zhangshi', 'zhongdechanyeyuan', 'zhonggongjie', 'beishi', 'changbai', 'hepingguangchang1', 'huizhanzhongxin1', 'maluwan', 'manrong', 'nanhu10', 'nanshichang', 'sanhaojie', 'shashan', 'taiyuanjie1', 'xinhuaguangchang', 'xita', 'zhongshanlu12', 'daxi', 'dongwulihe', 'fangjialan', 'jinlang', 'jinrongzhongxin', 'maguanqiao', 'nanta', 'quanyuan', 'shifu1', 'wanliutang', 'wuai', 'xinlibao', 'zhongjie', 'aoti4', 'baita1', 'changqing1114', 'donghu5', 'ershiyishiji', 'huizhanzhongxin1', 'ligongdaxue1', 'lixiang', 'qipanshan', 'shenfuxincheng', 'taoxian', 'xinnanzhan', 'xinshifu', 'yingchengzi', 'bawangsi', 'dongbeidamalu', 'dongzhongjie', 'ertaizi', 'liming', 'shangyuan', 'taocicheng', 'wanghua', 'wanliutang', 'beiling1', 'beixing', 'beizhanbei', 'changke', 'dingxianghu', 'lingdong', 'santaizi', 'shoufuxinqu', 'sitaizi', 'tawan1', 'zaohua', 'dingxianghu', 'helancun', 'hongqitai', 'lingxi', 'shaling', 'xisantaizi', 'yuhongguangchang', 'yuhongxincheng', 'zaohua', 'baita1', 'bayi2', 'huizhanzhongxin1', 'quzhongxin', 'sujiatunqu', 'tonggouxincheng', 'daoyi', 'hushitai', 'puhexincheng', 'qipanshan', 'sitaizi', 'xinchengzi', 'zhengliang']
+
+area_dict:
+{'kangpingxian1': 'fakuxian', 'fakuxian1': 'fakuxian', 'xinminshi1': 'liaozhongqu', 'liaozhongqu1': 'liaozhongqu', 'baogongbei': 'tiexi', 'baogongnan': 'tiexi', 'beierlu': 'tiexi', 'beiyilu': 'tiexi', 'gongrencun1': 'tiexi', 'huaxiang2': 'tiexi', 'jihong': 'tiexi', 'jingjijishukaifaqu': 'tiexi', 'qigongjie': 'tiexi', 'tiexiguangchang': 'tiexi', 'xinggongjie': 'tiexi', 'xizhan1': 'tiexi', 'yanfen': 'tiexi', 'yuhongguangchang': 'yuhong', 'yunfeng': 'tiexi', 'zhangshi': 'tiexi', 'zhongdechanyeyuan': 'tiexi', 'zhonggongjie': 'tiexi', 'beishi': 'heping1', 'changbai': 'heping1', 'hepingguangchang1': 'heping1', 'huizhanzhongxin1': 'sujiatun', 'maluwan': 'heping1', 'manrong': 'heping1', 'nanhu10': 'heping1', 'nanshichang': 'heping1', 'sanhaojie': 'heping1', 'shashan': 'heping1', 'taiyuanjie1': 'heping1', 'xinhuaguangchang': 'heping1', 'xita': 'heping1', 'zhongshanlu12': 'heping1', 'daxi': 
+'shenhe', 'dongwulihe': 'shenhe', 'fangjialan': 'shenhe', 'jinlang': 'shenhe', 'jinrongzhongxin': 'shenhe', 'maguanqiao': 'shenhe', 'nanta': 'shenhe', 'quanyuan': 'shenhe', 'shifu1': 'shenhe', 'wanliutang': 'dadong', 'wuai': 'shenhe', 'xinlibao': 'shenhe', 'zhongjie': 'shenhe', 'aoti4': 'hunnan', 
+'baita1': 'sujiatun', 'changqing1114': 'hunnan', 'donghu5': 'hunnan', 'ershiyishiji': 'hunnan', 'ligongdaxue1': 'hunnan', 'lixiang': 'hunnan', 'qipanshan': 'shenbeixinqu', 'shenfuxincheng': 'hunnan', 'taoxian': 'hunnan', 'xinnanzhan': 'hunnan', 'xinshifu': 'hunnan', 'yingchengzi': 'hunnan', 'bawangsi': 'dadong', 'dongbeidamalu': 'dadong', 'dongzhongjie': 'dadong', 'ertaizi': 'dadong', 'liming': 'dadong', 'shangyuan': 'dadong', 'taocicheng': 'dadong', 'wanghua': 'dadong', 'beiling1': 'huanggu', 'beixing': 'huanggu', 'beizhanbei': 'huanggu', 'changke': 'huanggu', 'dingxianghu': 'yuhong', 'lingdong': 'huanggu', 'santaizi': 'huanggu', 'shoufuxinqu': 'huanggu', 'sitaizi': 'shenbeixinqu', 'tawan1': 'huanggu', 'zaohua': 'yuhong', 'helancun': 
+'yuhong', 'hongqitai': 'yuhong', 'lingxi': 'yuhong', 'shaling': 'yuhong', 'xisantaizi': 'yuhong', 'yuhongxincheng': 'yuhong', 'bayi2': 'sujiatun', 'quzhongxin': 'sujiatun', 'sujiatunqu': 'sujiatun', 'tonggouxincheng': 'sujiatun', 'daoyi': 'shenbeixinqu', 'hushitai': 'shenbeixinqu', 'puhexincheng': 'shenbeixinqu', 'xinchengzi': 'shenbeixinqu', 'zhengliang': 'shenbeixinqu'}

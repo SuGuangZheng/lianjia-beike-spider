@@ -105,7 +105,7 @@ class ErShouSpider(BaseSpider):
                 print('找不到page-box的页面：'+'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name))
                 #此处应该加一个暂停线程，等待输入ok后再继续的功能(人机验证)
                 # 等待输入ok后再继续
-                stop = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则跳过该板块内容")
+                stop = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
                 if stop == 'stop':
                     return ershou_list
                 else:
@@ -187,34 +187,35 @@ class ErShouSpider(BaseSpider):
     def start(self):
         city = get_city()
         self.maxPerArea = get_maxPerArea()
+        #由用户输入本次要采集的板块——added by sugz
+        self.AreaListFromUser =  getAreaFromUser()
         self.today_path = create_date_path("{0}/ershou".format(SPIDER_NAME), city, self.date_string)
 
         t1 = time.time()  # 开始计时
+        if len(self.AreaListFromUser) > 0:
+            #非全部爬取
+            areas = self.AreaListFromUser
+        else:
+            #全部爬取
+            if city == 'sy':
+                areas = sy_areas
+                area_dict = sy_area_dict
+            else:
+                # 获得城市所有区县，['shenhe','tiexi',...]
+                districts = get_districts(city)
+                print('城市: {0}'.format(city))
+                print('全部区县: {0}'.format(districts))
 
-        # 获得城市有多少区列表, district: 区县
-        districts = get_districts(city)
-        print('城市: {0}'.format(city))
-        print('全部区县: {0}'.format(districts))
-
-        # 获得每个区的板块, area: 板块
-        areas = list()
-        for district in districts:
-            areas_of_district = get_areas(city, district)
-            print('区县:{0}, 全部板块:{1}'.format(district, areas_of_district))
-            # 用list的extend方法,L1.extend(L2)，该方法将参数L2的全部元素添加到L1的尾部
-            areas.extend(areas_of_district)
-            # 使用一个字典来存储区县和板块的对应关系, 例如{'beicai': 'pudongxinqu', }
-            for area in areas_of_district:
-                area_dict[area] = district
-
-
-        #for test——added by sugz
-        # area_dict={'aoti4': 'hunnan', 'baita1': 'sujiatun', 'baogongbei': 'tiexi', 'baogongnan': 'tiexi'}
-        # areas=['kangpingxian1', 'fakuxian1', 'xinminshi1', 'fakuxian1', 'kangpingxian1', 'liaozhongqu1', 'xinminshi1', 'baogongbei']
-        #for test End——added by sugz
-        
-        print("Area:", areas)
-        print("District and areas:", area_dict)
+                # 获得每个区的板块, area: 板块
+                areas = list()
+                for district in districts:
+                    areas_of_district = get_areas(city, district)
+                    print('区县:{0}, 全部板块:{1}'.format(district, areas_of_district))
+                    # 用list的extend方法,L1.extend(L2)，该方法将参数L2的全部元素添加到L1的尾部
+                    areas.extend(areas_of_district)
+                    # 使用一个字典来存储区县和板块的对应关系, 例如{'beicai': 'pudongxinqu', }
+                    for area in areas_of_district:
+                        area_dict[area] = district
 
         # 准备线程池用到的参数
         nones = [None for i in range(len(areas))]
