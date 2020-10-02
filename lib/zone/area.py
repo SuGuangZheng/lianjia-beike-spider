@@ -63,7 +63,7 @@ def getAreaFromUser():
     rightFlag = True
     while rightFlag:
         userAreaList = []
-        userArea = input('请输入本次要爬取的板块，爬取全部板块请直接回车，多个板块请用[]括起来，如：[beierlu,maluwan]')
+        userArea = input('请输入本次要爬取的板块，爬取全部板块请直接回车，多个板块请用[]括起来，如：[beierlu,maluwan]:\n')
         try:
             if '[' in userArea:
                 if '，' in userArea:

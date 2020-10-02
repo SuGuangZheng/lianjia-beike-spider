@@ -31,7 +31,7 @@ class ErShouSpider(BaseSpider):
         """
         ershous = self.get_area_ershou_info(city_name, area_name)
         if ershous:
-            district_name = area_dict.get(area_name, "")
+            district_name = self.area_dict.get(area_name, "")
             csv_file = self.today_path + "/{0}_{1}.csv".format(district_name, area_name)
             with open(csv_file, "w") as f:
                 # 开始获得需要的板块数据`
@@ -74,7 +74,7 @@ class ErShouSpider(BaseSpider):
         s = requests.session()
         s.keep_alive = False
         total_page = 1
-        district_name = area_dict.get(area_name, "")
+        district_name = self.area_dict.get(area_name, "")
         # 中文区县
         chinese_district = get_chinese_district(district_name)
         # 中文版块
@@ -110,12 +110,7 @@ class ErShouSpider(BaseSpider):
                     return ershou_list
                 else:
                     pass
-            #
-            # total_page = 1    
-        # 检测是否有房源——added by sugz 2020年9月23日
-        # except Exception as e:
-        #     print("\tWarning: only find one page for {0}".format(area_name))
-        #     print(e)
+
 
         # 从第一页开始,一直遍历到最后一页
         max_flag = False
@@ -132,16 +127,6 @@ class ErShouSpider(BaseSpider):
             response = requests.get(page, timeout=100, headers=headers)
             html = response.content
             soup = BeautifulSoup(html, "lxml")
-
-            # 获得有小区信息的panel
-            # 检测是否有房源——added by sugz 2020年9月23日
-            # noResFlag = soup.find_all('div',class_='m-noresult')
-            # if noResFlag:
-            #     print('注意:'+area_name+'板块无房源!!!')
-            #     continue
-            # else:
-            #     print(area_name+'有房子')
-            # 检测是否有房源-end
 
             house_elements = soup.find_all('li', class_="clear")
             # for house_elem in house_elements:
@@ -182,7 +167,24 @@ class ErShouSpider(BaseSpider):
                     break
         return ershou_list
 
-    
+    def get_area_dict(self,city):
+        '''
+        获得城市所有区县，areas=['shenhe','tiexi',...],area_dict={'sanhaojie':'heping',...}
+        '''
+        districts = get_districts(city)
+        print('城市: {0}'.format(city))
+        print('全部区县: {0}'.format(districts))
+        # 获得每个区的板块, area: 板块
+        areas = list()
+        for district in districts:
+            areas_of_district = get_areas(city, district)
+            print('区县:{0}, 全部板块:{1}'.format(district, areas_of_district))
+            # 用list的extend方法,L1.extend(L2)，该方法将参数L2的全部元素添加到L1的尾部
+            areas.extend(areas_of_district)
+            # 使用一个字典来存储区县和板块的对应关系, 例如{'beicai': 'pudongxinqu', }
+            for area in areas_of_district:
+                area_dict[area] = district
+        return areas,area_dict
 
     def start(self):
         city = get_city()
@@ -192,30 +194,17 @@ class ErShouSpider(BaseSpider):
         self.today_path = create_date_path("{0}/ershou".format(SPIDER_NAME), city, self.date_string)
 
         t1 = time.time()  # 开始计时
+
+        # if city == 'sy':
+        #         areas = sy_areas
+        #         self.area_dict = sy_area_dict
+        # else:
+        #     #如果不是沈阳
+        areas,self.area_dict = self.get_area_dict(city)
+
         if len(self.AreaListFromUser) > 0:
             #非全部爬取
             areas = self.AreaListFromUser
-        else:
-            #全部爬取
-            if city == 'sy':
-                areas = sy_areas
-                area_dict = sy_area_dict
-            else:
-                # 获得城市所有区县，['shenhe','tiexi',...]
-                districts = get_districts(city)
-                print('城市: {0}'.format(city))
-                print('全部区县: {0}'.format(districts))
-
-                # 获得每个区的板块, area: 板块
-                areas = list()
-                for district in districts:
-                    areas_of_district = get_areas(city, district)
-                    print('区县:{0}, 全部板块:{1}'.format(district, areas_of_district))
-                    # 用list的extend方法,L1.extend(L2)，该方法将参数L2的全部元素添加到L1的尾部
-                    areas.extend(areas_of_district)
-                    # 使用一个字典来存储区县和板块的对应关系, 例如{'beicai': 'pudongxinqu', }
-                    for area in areas_of_district:
-                        area_dict[area] = district
 
         # 准备线程池用到的参数
         nones = [None for i in range(len(areas))]
