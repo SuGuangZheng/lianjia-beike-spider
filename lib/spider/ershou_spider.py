@@ -29,11 +29,21 @@ class ErShouSpider(BaseSpider):
         :param fmt: 保存文件格式
         :return: None
         """
+        self.clear_csv(area_name)
         ershous = self.get_area_ershou_info(city_name, area_name)
+        #改成每完成一页就存到csv一下
+        # self.write_tocsv(ershous,area_name)
+    def clear_csv(self,area_name):
+        district_name = self.area_dict.get(area_name, "")
+        csv_file = self.today_path + "/{0}_{1}.csv".format(district_name, area_name)
+        with open(csv_file, "w",encoding = 'utf8') as f:
+            f.write('')
+
+    def write_tocsv(self,ershous,area_name,page = 1,fmt='csv'):
         if ershous:
             district_name = self.area_dict.get(area_name, "")
             csv_file = self.today_path + "/{0}_{1}.csv".format(district_name, area_name)
-            with open(csv_file, "w") as f:
+            with open(csv_file, "a",encoding = 'utf8') as f:
                 # 开始获得需要的板块数据`
                 # ershous = self.get_area_ershou_info(city_name, area_name)`
                 # 锁定，多线程读写
@@ -43,12 +53,11 @@ class ErShouSpider(BaseSpider):
                     self.mutex.release()
                 if fmt == "csv":
                     for ershou in ershous:
-                        # print(date_string + "," + xiaoqu.text())
                         f.write(self.date_string + "," + ershou.text() + "\n")
-            print("完成板块: " + area_name + " \n数据保存到 : " + csv_file+'\n')
+            print("+++++++++++++++++完成板块: " + area_name+'.Page.'+ str(page) + "   数据保存到 : " + csv_file+'+++++++++++++++++')
         else:
             pass
-    
+
     #added by sugz
     @staticmethod
     def makeSoup(city_name,area_name):
@@ -101,7 +110,7 @@ class ErShouSpider(BaseSpider):
                 print('找不到类名为page-box的div，可能被反爬虫了!!!')
                 print('找不到page-box的页面：'+'http://{0}.{1}.com/ershoufang/{2}/'.format(city_name, SPIDER_NAME, area_name))
                 # 等待输入ok后再继续
-                stop = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
+                stop = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容\n")
                 if stop == 'stop':
                     return ershou_list
                 else:
@@ -110,6 +119,7 @@ class ErShouSpider(BaseSpider):
         # 从第一页开始,一直遍历到最后一页
         max_flag = False
         for num in range(1, total_page + 1):
+            ershou_list = list()#存进csv后清空ershou_list，避免存过的占用内存
             if max_flag:
                 break
             page = 'http://{0}.{1}.com/ershoufang/{2}/pg{3}'.format(city_name, SPIDER_NAME, area_name, num)
@@ -129,7 +139,7 @@ class ErShouSpider(BaseSpider):
                     print('找不到板块的某一页，可能被反爬虫了!!!')
                     print('找不到的页面：'+ page)
                     # 等待输入ok后再继续
-                    stop1 = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
+                    stop1 = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容\n")
                     if stop1 == 'stop':
                         return ershou_list
                     else:
@@ -159,7 +169,7 @@ class ErShouSpider(BaseSpider):
                         print('找不到某个房屋详情页，可能被反爬虫了!!!')
                         print('找不到的页面：'+ detail_href)
                         # 等待输入ok后再继续
-                        stop1 = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容")
+                        stop1 = input("请刷新页面手动进行人机验证，完成后输入任意字符回车，程序继续运行。如果输入stop则结束该板块内容\n")
                         if stop1 == 'stop':
                             return ershou_list
                         else:
@@ -185,6 +195,8 @@ class ErShouSpider(BaseSpider):
                 if xuhao >= (self.maxPerArea-1):
                     max_flag = True
                     break
+            #完成一页就写入csv文件
+            self.write_tocsv(ershou_list,area_name,num)
         return ershou_list
 
     def get_area_dict(self,city):
@@ -212,9 +224,7 @@ class ErShouSpider(BaseSpider):
         #由用户输入本次要采集的板块——added by sugz
         self.AreaListFromUser =  getAreaFromUser()
         self.today_path = create_date_path("{0}/ershou".format(SPIDER_NAME), city, self.date_string)
-
         t1 = time.time()  # 开始计时
-
         # if city == 'sy':
         #         areas = sy_areas
         #         self.area_dict = sy_area_dict
@@ -230,7 +240,6 @@ class ErShouSpider(BaseSpider):
         nones = [None for i in range(len(areas))]
         city_list = [city for i in range(len(areas))]
         args = zip(zip(city_list, areas), nones)
-        # areas = areas[0: 1]   # For debugging
 
         # 针对每个板块写一个文件,启动一个线程来操作
         pool_size = thread_pool_size
@@ -242,8 +251,8 @@ class ErShouSpider(BaseSpider):
 
         # 计时结束，统计结果
         t2 = time.time()
-        print("Total crawl {0} areas.".format(len(areas)))
-        print("Total cost {0} second to crawl {1} data items.".format(t2 - t1, self.total_num))
+        print("共爬取了 {0} 个板块.".format(len(areas)))
+        print("总用时 {0} 秒， 爬取了 {1} 条数据.".format(t2 - t1, self.total_num))
 
 
 if __name__ == '__main__':

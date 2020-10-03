@@ -1,11 +1,10 @@
 考虑添加的功能：
 ershou：
+1.over-每次start时清空csv文件内容
+2.over-每下载到一页的数据就写入csv，而非目前的每个板块全部完成再写入
+4.结束板块时报错处理：UnicodeEncodeError: 'gbk' codec can't encode character '\xb2' in position 36
 
-2.每下载到一页的数据就写入csv，而非目前的每个板块全部完成再写入
-3.反爬虫提示后，继续上次的爬取，而不是放弃之前的，重新开始下一个
-4.每个发req的地方都要加input暂停，等人工进行人机验证后输入ok后再继续
-
-
+[nanhu10,maluwan,changbai,sanhaojie,shashan]
 
 
 
