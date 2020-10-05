@@ -2,7 +2,7 @@
 ershou：
 1.over-每次start时清空csv文件内容
 2.over-每下载到一页的数据就写入csv，而非目前的每个板块全部完成再写入
-4.结束板块时报错处理：UnicodeEncodeError: 'gbk' codec can't encode character '\xb2' in position 36
+4.over-结束板块时报错处理：UnicodeEncodeError: 'gbk' codec can't encode character '\xb2' in position 36
 
 [nanhu10,maluwan,changbai,sanhaojie,shashan]
 

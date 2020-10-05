@@ -11,12 +11,12 @@ from lib.utility.date import *
 import lib.utility.version
 import random
 
-thread_pool_size = 10
+thread_pool_size = 3
 
 # 防止爬虫被禁，随机延迟设定
 # 如果不想delay，就设定False，
 # 具体时间可以修改random_delay()，由于多线程，建议数值大于10
-RANDOM_DELAY = 2
+RANDOM_DELAY = 1
 LIANJIA_SPIDER = "lianjia"
 BEIKE_SPIDER = "ke"
 # SPIDER_NAME = LIANJIA_SPIDER
