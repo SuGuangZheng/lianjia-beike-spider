@@ -253,6 +253,8 @@ class ErShouSpider(BaseSpider):
         t2 = time.time()
         print("共爬取了 {0} 个板块.".format(len(areas)))
         print("总用时 {0} 秒， 爬取了 {1} 条数据.".format(t2 - t1, self.total_num))
+        wordsLast()
+
 
 
 if __name__ == '__main__':

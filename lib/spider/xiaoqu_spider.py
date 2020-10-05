@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-# author: zengyuetian
+# author: suguangzheng
 # 此代码仅供学习与交流，请勿用于商业用途。
 # 爬取小区数据的爬虫派生类
 
@@ -290,6 +290,7 @@ class XiaoQuBaseSpider(BaseSpider):
         t2 = time.time()
         print("共爬取了 {0} 个板块.".format(len(areas)))
         print("总用时 {0} 秒， 爬取了 {1} 条数据.".format(t2 - t1, self.total_num))
+        wordsLast()
 
 
 if __name__ == "__main__":

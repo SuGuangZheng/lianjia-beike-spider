@@ -129,6 +129,7 @@ class LouPanBaseSpider(BaseSpider):
 
         print("Total crawl {0} loupan.".format(self.total_num))
         print("Total cost {0} second ".format(t2 - t1))
+        wordsLast()
 
 
 if __name__ == '__main__':

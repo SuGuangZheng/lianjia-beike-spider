@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-# author: zengyuetian
+# author: suguangzheng
 # 此代码仅供学习与交流，请勿用于商业用途。
 # 爬虫基类
 # 爬虫名常量，用来设置爬取哪个站点
@@ -21,7 +21,8 @@ LIANJIA_SPIDER = "lianjia"
 BEIKE_SPIDER = "ke"
 # SPIDER_NAME = LIANJIA_SPIDER
 SPIDER_NAME = LIANJIA_SPIDER
-
+def wordsLast():
+    print('\n大部分人在二三十岁就已经死了，因为过了这个年龄，他们只是自己的影子。此后的余生则是在模仿自己中度过，日复一日，更机械、更装腔作势地重复他们有生之年的所作所为、所思所想、所爱所恨---------罗曼罗兰\n')
 
 class BaseSpider(object):
     @staticmethod
